@@ -26,60 +26,13 @@
 
     <!-- Map -->
     <div id="map" class="h-full relative z-10">
-      <!-- Species Info-->
-      <SpeciesInfo />
       <div
         class="leaflet-control-dialog leaflet-control bg-white"
         style="width: 300px; height: 300px; top: 150px; left: 250px"
       >
         <div class="leaflet-control-dialog-inner">
-          <div class="leaflet-control-dialog-contents">
-            <p>Hello! Welcome to your nice new dialog box!</p>
-            <button
-              class="btn btn-primary"
-              onclick="dialog.setSize([ 350, 350 ])"
-            >
-              dialog.setSize([ 350, 350 ])</button
-            ><br /><br /><button
-              class="btn btn-primary"
-              onclick="dialog.setLocation([ 50, 50 ])"
-            >
-              dialog.setLocation([ 50, 50 ])</button
-            ><br /><br /><button
-              class="btn btn-danger"
-              onclick="dialog.freeze()"
-            >
-              dialog.freeze()</button
-            >&nbsp;&nbsp;<button
-              class="btn btn-success"
-              onclick="dialog.unfreeze()"
-            >
-              dialog.unfreeze()</button
-            ><br /><br /><button
-              class="btn btn-danger"
-              onclick="dialog.hideClose()"
-            >
-              dialog.hideClose()</button
-            ><button class="btn btn-success" onclick="dialog.showClose()">
-              dialog.showClose()</button
-            ><br /><br /><button
-              class="btn btn-danger"
-              onclick="dialog.hideResize()"
-            >
-              dialog.hideResize()</button
-            ><button class="btn btn-success" onclick="dialog.showResize()">
-              dialog.showResize()</button
-            ><br /><br />
-          </div>
-          <div class="leaflet-control-dialog-grabber">
-            <i class="fa fa-arrows"></i>
-          </div>
-          <div class="leaflet-control-dialog-close">
-            <i class="fa fa-times"></i>
-          </div>
-          <div class="leaflet-control-dialog-resizer">
-            <i class="fa fa-arrows-h fa-rotate-45"></i>
-          </div>
+          <!-- Species Info-->
+          <SpeciesInfo />
         </div>
       </div>
     </div>
