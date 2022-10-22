@@ -26,15 +26,8 @@
 
     <!-- Map -->
     <div id="map" class="h-full relative z-10">
-      <div
-        class="leaflet-control-dialog leaflet-control bg-white"
-        style="width: 300px; height: 300px; top: 150px; left: 250px"
-      >
-        <div class="leaflet-control-dialog-inner">
-          <!-- Species Info-->
-          <SpeciesInfo />
-        </div>
-      </div>
+      <!-- Species Info-->
+      <SpeciesInfo />
     </div>
   </div>
 </template>
