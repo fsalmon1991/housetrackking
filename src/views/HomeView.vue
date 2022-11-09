@@ -5,6 +5,15 @@
       v-if="geoError"
       :geoErrorMsg="geoErrorMsg"
     />
+    <MapFeature
+      @getLocation="getLocation"
+      @plotResult="plotResult"
+      @toggleSearchResults="toggleSearchResults"
+      @removeResult="removeResult"
+      :coords="coords"
+      :fetchcoord="fetchcoord"
+      :searchResults="searchResults"
+    />
     <div id="map" class="h-full z-[1]"></div>
   </div>
 </template>
@@ -12,63 +21,79 @@
 <script setup>
 // @ is an alias to /src
 /* eslint-disable */
-import { onMounted, ref } from "vue";
+import { onMounted, ref, onUpdated } from "vue";
 import leaflet from "leaflet";
 import GeoErrorModal from "../components/GeoErrorModal.vue";
+import MapFeature from "../components/MapFeature.vue";
 
-var mbAttr =
-  'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>';
-var mbUrl = `https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=${process.env.VUE_APP_API_KEY}`;
 let map;
 onMounted(() => {
-  var streets = leaflet.tileLayer(mbUrl, {
-    id: "mapbox/streets-v11",
-    tileSize: 512,
-    maxZoom: 18,
-    minZoom: 10,
-    zoomOffset: -1,
-    attribution: mbAttr,
+  // init map
+  map = leaflet
+    .map("map", {
+      zoomControl: false,
+    })
+    .setView([33.4484, -112.074], 10);
+  // add tile layers
+  leaflet
+    .tileLayer(
+      `https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=${process.env.VUE_APP_API_KEY}`,
+      {
+        maxZoom: 18,
+        id: "mapbox/streets-v11",
+        tileSize: 512,
+        zoomOffset: -1,
+        accessToken: process.env.VUE_APP_API_KEY,
+      }
+    )
+    .addTo(map);
+  map.on("moveend", () => {
+    closeSearchResult();
   });
-  var osm = leaflet.tileLayer(
-    "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
-    {
-      maxZoom: 18,
-      minZoom: 10,
-      attribution:
-        '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+  map.on("zoomend", () => {
+    var geo = map.getCenter();
+    console.log(map.getZoom());
+    if (map.getZoom() > 14) {
+      if (resultMarker.value) {
+        map.removeLayer(resultMarker.value);
+      }
+      // create custom marker
+      const resultMarkerIcon = leaflet.icon({
+        iconUrl: require("../assets/location-2.svg"),
+        iconSize: [35, 35],
+      });
+      // cretae new marker and costum marker
+      resultMarker.value = leaflet
+        .marker([coords.coordinates[1], coords.coordinates[0]], {
+          icon: resultMarkerIcon,
+        })
+        .addTo(map);
+      // set map view current location
+      //const latlng = map.latLng(coords.coordinates[1], coords.coordinates[0]);
+      map.setView(
+        [coords.coordinates[1], coords.coordinates[0]],
+        map.getZoom()
+      );
     }
-  );
-  var satellite = leaflet.tileLayer(mbUrl, {
-    attribution: mbAttr,
-    maxZoom: 18,
-    minZoom: 10,
-    id: "mapbox/satellite-v9",
-    tileSize: 512,
-    zoomOffset: -1,
-    accessToken: process.env.VUE_APP_API_KEY,
   });
-  map = leaflet.map("map", {
-    center: [33.5039591, -112.2923307],
-    zoom: 17,
-    layers: osm,
-  });
-  var baseLayers = {
-    "Open Street Map": osm,
-    Streets: streets,
-    Satellite: satellite,
-  };
-  leaflet.control.layers(baseLayers).addTo(map);
-
   getLocation();
 });
 
 const coords = ref(null);
 const fetchcoord = ref(null);
 const geoMarker = ref(null);
-const geoError = ref(true);
+const geoError = ref(null);
 const geoErrorMsg = ref("Testing");
+const resultMarker = ref(null);
+const searchResults = ref(null);
 
 const getLocation = () => {
+  if (coords.value) {
+    coords.value = null;
+    sessionStorage.removeItem("coords");
+    map.removeLayer(geoMarker.value);
+    return;
+  }
   if (sessionStorage.getItem("coords")) {
     coords.value = JSON.parse(sessionStorage.getItem("coords"));
     plotGeolocation(coords.value);
@@ -92,6 +117,7 @@ const setCoords = (pos) => {
   // plot user location on leaflet map function
   plotGeolocation(coords.value);
 };
+
 const getLocError = (err) => {
   fetchcoord.value = null;
   geoError.value = true;
@@ -113,6 +139,36 @@ const plotGeolocation = (coords) => {
     .marker([coords.lat, coords.lon], { icon: customMarker })
     .addTo(map);
   // set map view current location
-  map.setView([coords.lat, coords.lon], 11);
+  //const latlng = map.latLng(coords.lat, coords.lon);
+  map.setView([coords.lat, coords.lon], 14);
+};
+const plotResult = (coords) => {
+  if (resultMarker.value) {
+    map.removeLayer(resultMarker.value);
+  }
+  // create custom marker
+  const resultMarkerIcon = leaflet.icon({
+    iconUrl: require("../assets/location-2.svg"),
+    iconSize: [35, 35],
+  });
+  // cretae new marker and costum marker
+  resultMarker.value = leaflet
+    .marker([coords.coordinates[1], coords.coordinates[0]], {
+      icon: resultMarkerIcon,
+    })
+    .addTo(map);
+  // set map view current location
+  //const latlng = map.latLng(coords.coordinates[1], coords.coordinates[0]);
+  map.setView([coords.coordinates[1], coords.coordinates[0]], 14);
+  closeSearchResult();
+};
+const toggleSearchResults = () => {
+  searchResults.value = !searchResults.value;
+};
+const closeSearchResult = () => {
+  searchResults.value = null;
+};
+const removeResult = () => {
+  map.removeLayer(resultMarker.value);
 };
 </script>

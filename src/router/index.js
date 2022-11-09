@@ -7,7 +7,7 @@ const routes = [
     name: 'home',
     component: HomeView,
     meta:{
-      title: "Queen Garden Atlas"
+      title: "House Tracking PN&M"
     }
   },
  
